@@ -1,0 +1,142 @@
+[
+  {
+    "company": "FedEx",
+    "rates": [
+      {
+        "weightKg": 0.5,
+        "parcelType": "DOX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 1,
+        "parcelType": "DOX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 1.5,
+        "parcelType": "DOX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 2,
+        "parcelType": "DOX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 0.5,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 1,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 1.5,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 2,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 2.5,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 3,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 3.5,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 4,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 30,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      }
+    ]
+  },
+  {
+    "company": "DHL",
+    "rates": [
+      {
+        "weightKg": 0.5,
+        "parcelType": "DOX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 1,
+        "parcelType": "DOX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 1.5,
+        "parcelType": "DOX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 2,
+        "parcelType": "DOX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 0.5,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 1,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 1.5,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 2,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 2.5,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 3,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 3.5,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 4,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      },
+      {
+        "weightKg": 30,
+        "parcelType": "WPX",
+        "rates": { "ZoneA": "", "ZoneB": "", "ZoneC": "", "ZoneD": "", "ZoneE": "" }
+      }
+    ]
+  }
+]
