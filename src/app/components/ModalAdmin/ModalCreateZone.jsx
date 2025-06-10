@@ -27,7 +27,7 @@ const ModalCreateZone = ({ isOpen, onClose, title, children, fetchData }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch("https://server-7tons.vercel.app/api/zone");
+      const response = await fetch("https://server-gs-two.vercel.app/api/zone");
       const data = await response.json();
       if (data.success) {
         setZones(data.data);
@@ -44,7 +44,7 @@ const ModalCreateZone = ({ isOpen, onClose, title, children, fetchData }) => {
 
   const fetchCountries = async () => {
     try {
-      const response = await fetch("https://server-7tons.vercel.app/api/countryList");
+      const response = await fetch("https://server-gs-two.vercel.app/api/countryList");
       const data = await response.json();
       if (data.success) {
         setCountries(data.data);
@@ -73,7 +73,7 @@ const ModalCreateZone = ({ isOpen, onClose, title, children, fetchData }) => {
 
     try {
       const response = await fetch(
-        `https://server-7tons.vercel.app/api/zone/${zoneId}/add-countries`,
+        `https://server-gs-two.vercel.app/api/zone/${zoneId}/add-countries`,
         {
           method: "POST",
           headers: {
@@ -122,7 +122,7 @@ const ModalCreateZone = ({ isOpen, onClose, title, children, fetchData }) => {
 
     try {
       const response = await fetch(
-        `https://server-7tons.vercel.app/api/zone/${zoneId}/${countryCode}`,
+        `https://server-gs-two.vercel.app/api/zone/${zoneId}/${countryCode}`,
         {
           method: "DELETE",
         }
@@ -154,7 +154,7 @@ const ModalCreateZone = ({ isOpen, onClose, title, children, fetchData }) => {
     try {
       setDeleteLoading(true);
       const response = await fetch(
-        `https://server-7tons.vercel.app/api/zone/${zoneName}`,
+        `https://server-gs-two.vercel.app/api/zone/${zoneName}`,
         {
           method: "DELETE",
         }

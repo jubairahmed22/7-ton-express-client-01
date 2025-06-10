@@ -116,9 +116,9 @@ const CreateShipment = () => {
     const fetchData = async () => {
       try {
         const [countryRes, zoneRes, pricingRes] = await Promise.all([
-          fetch("https://server-7tons.vercel.app/api/countryList"),
-          fetch("https://server-7tons.vercel.app/api/zone"),
-          fetch("https://server-7tons.vercel.app/api/zone/pricing"),
+          fetch("https://server-gs-two.vercel.app/api/countryList"),
+          fetch("https://server-gs-two.vercel.app/api/zone"),
+          fetch("https://server-gs-two.vercel.app/api/zone/pricing"),
         ]);
 
         if (!countryRes.ok || !zoneRes.ok || !pricingRes.ok) {
@@ -351,7 +351,7 @@ const CreateShipment = () => {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch("https://server-7tons.vercel.app/api/countryList");
+        const response = await fetch("https://server-gs-two.vercel.app/api/countryList");
         const data = await response.json();
         if (data.success) {
           setCountries(data.data);
@@ -483,7 +483,7 @@ const CreateShipment = () => {
       };
 
       const response = await fetch(
-        "https://server-7tons.vercel.app/api/create-inter-shipment",
+        "https://server-gs-two.vercel.app/api/create-inter-shipment",
         {
           method: "POST",
           headers: {

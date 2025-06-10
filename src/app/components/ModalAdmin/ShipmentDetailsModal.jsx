@@ -14,7 +14,7 @@ const ShipmentDetailsModal = ({ shipment, onClose }) => {
 
     try {
       const response = await fetch(
-        `https://server-7tons.vercel.app/api/delete-inter-shipment-list/${shipment._id}`,
+        `https://server-gs-two.vercel.app/api/delete-inter-shipment-list/${shipment._id}`,
         {
           method: "DELETE",
         }

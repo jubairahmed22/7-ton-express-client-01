@@ -41,7 +41,7 @@ const CreateShippingForm = () => {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch("https://server-7tons.vercel.app/api/countryList");
+        const response = await fetch("https://server-gs-two.vercel.app/api/countryList");
         const data = await response.json();
         if (data.success) {
           setCountries(data.data);
@@ -148,7 +148,7 @@ const CreateShippingForm = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        "https://server-7tons.vercel.app/api/create-inter-shipment",
+        "https://server-gs-two.vercel.app/api/create-inter-shipment",
         {
           method: "POST",
           headers: {

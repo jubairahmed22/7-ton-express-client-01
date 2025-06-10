@@ -220,7 +220,7 @@ export default function CustomerSidebar({ isCollapsed, toggleSidebar }) {
         </div>
 
         {/* Navigation items */}
-        <nav className="mt-6 overflow-y-auto h-[calc(100vh-80px)]">
+        {/* <nav className="mt-6 overflow-y-auto h-[calc(100vh-80px)]">
           {navItems.map((item, index) => (
             <div key={item.name} className="mb-1 mx-2">
               {item.submenu ? (
@@ -359,7 +359,7 @@ export default function CustomerSidebar({ isCollapsed, toggleSidebar }) {
               )}
             </div>
           ))}
-        </nav>
+        </nav> */}
       </div>
     </>
   );

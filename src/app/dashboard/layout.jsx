@@ -2,6 +2,7 @@
 "use client";
 
 import AdminNavbar from "../components/AdminNavbar";
+import CustomerSidebar from "../components/CustomerSidebar";
 import AdminSidebar from "../components/AdminSidebar";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { useState } from "react";
@@ -14,7 +15,7 @@ export default function AdminLayout({ children }) {
     <ProtectedRoute allowedRoles={["user"]}>
       <div className="flex h-screen bg-gray-100 relative">
         {/* Admin Sidebar - z-20 */}
-        <AdminSidebar
+        <CustomerSidebar
           isCollapsed={sidebarCollapsed}
           toggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
         />

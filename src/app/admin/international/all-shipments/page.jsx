@@ -68,7 +68,7 @@ const ShipmentListPage = () => {
         });
 
         const response = await fetch(
-          `https://server-7tons.vercel.app/api/inter-shipment-list?${params.toString()}`
+          `https://server-gs-two.vercel.app/api/inter-shipment-list?${params.toString()}`
         );
         const data = await response.json();
 
@@ -114,7 +114,7 @@ const ShipmentListPage = () => {
       try {
         // Fetch companies
         const companiesResponse = await fetch(
-          "https://server-7tons.vercel.app/api/zone/pricing"
+          "https://server-gs-two.vercel.app/api/zone/pricing"
         );
         const companiesData = await companiesResponse.json();
         if (companiesData.success) {
@@ -123,7 +123,7 @@ const ShipmentListPage = () => {
 
         // Fetch countries
         const countriesResponse = await fetch(
-          "https://server-7tons.vercel.app/api/countryList"
+          "https://server-gs-two.vercel.app/api/countryList"
         );
         const countriesData = await countriesResponse.json();
         if (countriesData.success) {

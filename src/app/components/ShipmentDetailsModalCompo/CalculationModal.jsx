@@ -133,9 +133,9 @@ const CalculationModal = ({
     const fetchData = async () => {
       try {
         const [countryRes, zoneRes, pricingRes] = await Promise.all([
-          fetch("https://server-7tons.vercel.app/api/countryList"),
-          fetch("https://server-7tons.vercel.app/api/zone"),
-          fetch("https://server-7tons.vercel.app/api/zone/pricing"),
+          fetch("https://server-gs-two.vercel.app/api/countryList"),
+          fetch("https://server-gs-two.vercel.app/api/zone"),
+          fetch("https://server-gs-two.vercel.app/api/zone/pricing"),
         ]);
 
         if (!countryRes.ok || !zoneRes.ok || !pricingRes.ok) {

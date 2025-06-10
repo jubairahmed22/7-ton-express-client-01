@@ -60,7 +60,7 @@ const UpdateSenderReceiver = ({ shipment }) => {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch("https://server-7tons.vercel.app/api/countryList");
+        const response = await fetch("https://server-gs-two.vercel.app/api/countryList");
         const data = await response.json();
         if (data.success) {
           setCountries(data.data);
@@ -191,7 +191,7 @@ const UpdateSenderReceiver = ({ shipment }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://server-7tons.vercel.app/api/update-inter-shipment/${shipment._id}`,
+        `https://server-gs-two.vercel.app/api/update-inter-shipment/${shipment._id}`,
         {
           method: "PUT",
           headers: {
