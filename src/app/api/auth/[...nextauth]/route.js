@@ -12,7 +12,7 @@ export const authOptions = {
       },
       async authorize(credentials) {
         try {
-          const response = await axios.post('/api/auth/login', credentials)
+          const response = await axios.post('https://server-7tons.vercel.app/api/auth/login', credentials)
           const data = response.data
 
           if (data?.token) {

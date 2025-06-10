@@ -17,7 +17,7 @@ export default function RegisterPage() {
     setLoading(true)
     
     try {
-      const response = await axios.post('/api/auth/register', {
+      const response = await axios.post('https://server-7tons.vercel.app/api/auth/register', {
         name,
         email,
         password
