@@ -3,16 +3,23 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import ModalCreateZone from "../../../../components/ModalAdmin/ModalCreateZone";
+import ModalCreateCompany from "../../../../components/ModalAdmin/ModalCreateCompany";
 import SpinnerBlur from "../../../../components/Spinner/SpinnerBlur";
+import ShippingHeader from "../../../../components/InternationalConfiguration/ShippingHeader";
+import ShippingError from "../../../../components/InternationalConfiguration/ShippingError";
+import ShippingTable from "../../../../components/InternationalConfiguration/ShippingTable";
 
-const Page = () => {
+const ShippingConfigurationPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const [isZoneModalOpen, setIsZoneModalOpen] = useState(false);
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [allRatesData, setAllRatesData] = useState([]);
   const [filteredRates, setFilteredRates] = useState([]);
-  const [selectedCompany, setSelectedCompany] = useState(searchParams.get("company") || "");
+  const [selectedCompany, setSelectedCompany] = useState(
+    searchParams.get("company") || ""
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -29,7 +36,8 @@ const Page = () => {
       const data = await response.json();
       setAllRatesData(data.data);
 
-      const initialCompany = searchParams.get("company") || data.data[0]?.company;
+      const initialCompany =
+        searchParams.get("company") || data.data[0]?.company;
       setSelectedCompany(initialCompany);
 
       const filtered = data.data.filter(
@@ -58,8 +66,6 @@ const Page = () => {
     }
   };
 
-  
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -75,7 +81,9 @@ const Page = () => {
     setSelectedCompany(value);
     const params = new URLSearchParams(window.location.search);
     params.set("company", value);
-    router.push(`/admin/configurations/international/shipping?${params.toString()}`);
+    router.push(
+      `/admin/configurations/international/shipping?${params.toString()}`
+    );
   };
 
   const handleRateChange = (companyIndex, rateIndex, zone, value) => {
@@ -94,44 +102,55 @@ const Page = () => {
     setHasChanges(true);
   };
 
-  const saveAllChanges = async () => {
-    setIsSaving(true);
-    try {
-      const updates = allRatesData.map((companyData) => ({
-        _id: companyData._id,
-        rates: companyData.rates.map((rate) => ({
-          _id: rate._id,
-          weightKg: rate.weightKg,
-          parcelType: rate.parcelType,
-          rates: Object.fromEntries(
-            Object.entries(rate.rates).map(([zone, value]) => [
-              zone,
-              value === "" ? "" : Number(value),
-            ])
-          ),
-        })),
-      }));
+  // Add this new handler function
+const handleWeightChange = (companyIndex, rateIndex, value) => {
+  if (value === "" || /^\d*\.?\d*$/.test(value)) {
+    const updatedRates = [...allRatesData];
+    updatedRates[companyIndex].rates[rateIndex].weightKg = value;
+    setAllRatesData(updatedRates);
+    setHasChanges(true);
+  }
+};
 
-      const response = await fetch("https://server-gs-two.vercel.app/api/zone/bulk", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ updates }),
-      });
+// Update the saveAllChanges function
+const saveAllChanges = async () => {
+  setIsSaving(true);
+  try {
+    const updates = allRatesData.map((companyData) => ({
+      _id: companyData._id,
+      rates: companyData.rates.map((rate) => ({
+        _id: rate._id,
+        weightKg: rate.weightKg === "" ? "" : Number(rate.weightKg),
+        parcelType: rate.parcelType,
+        rates: Object.fromEntries(
+          Object.entries(rate.rates).map(([zone, value]) => [
+            zone,
+            value === "" ? "" : Number(value),
+          ])
+        ),
+      })),
+    }));
 
-      if (!response.ok) throw new Error("Failed to save changes");
+    const response = await fetch("https://server-gs-two.vercel.app/api/zone/bulk", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ updates }),
+    });
 
-      const data = await response.json();
-      toast.success(data.message || "All changes saved successfully");
-      setHasChanges(false);
-      fetchData();
-    } catch (err) {
-      toast.error(err.message || "Error saving changes");
-    } finally {
-      setIsSaving(false);
-    }
-  };
+    if (!response.ok) throw new Error("Failed to save changes");
+
+    const data = await response.json();
+    toast.success(data.message || "All changes saved successfully");
+    setHasChanges(false);
+    fetchData();
+  } catch (err) {
+    toast.error(err.message || "Error saving changes");
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   const handleAddNewPricing = async (newPricing) => {
     try {
@@ -164,156 +183,131 @@ const Page = () => {
     }
   };
 
-  const companies = [...new Set(allRatesData.map((item) => item.company))];
+  const handleDuplicateRow = async (companyId, rowIndex) => {
+    try {
+      const response = await fetch(
+        `https://server-gs-two.vercel.app/api/add-row/${companyId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            rowIndex: rowIndex,
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to duplicate row");
+
+      const result = await response.json();
+
+      setFilteredRates((prevRates) =>
+        prevRates.map((company) =>
+          company._id === companyId
+            ? { ...company, rates: result.data.rates }
+            : company
+        )
+      );
+    } catch (error) {
+      console.error("Error duplicating row:", error);
+      toast.error("Failed to duplicate row");
+    }
+  };
+
+  const handleDeleteRow = async (companyId, rowIndex) => {
+  try {
+    // Show confirmation dialog
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this row? This action cannot be undone."
+    );
+    
+    if (!confirmDelete) return; // Exit if user cancels
+
+    // Show loading state
+    toast.info("Deleting row...", { autoClose: false, toastId: "deleting-row" });
+
+    const response = await fetch(
+      `https://server-gs-two.vercel.app/api/delete-row/${companyId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          rowIndex: rowIndex,
+        }),
+      }
+    );
+
+    if (!response.ok) throw new Error("Failed to delete row");
+
+    const result = await response.json();
+
+    // Update state
+    setFilteredRates((prevRates) =>
+      prevRates.map((company) =>
+        company._id === companyId
+          ? { ...company, rates: result.data.rates }
+          : company
+      )
+    );
+
+    // Show success message
+    toast.dismiss("deleting-row");
+    toast.success("Row deleted successfully");
+    
+  } catch (error) {
+    console.error("Error deleting row:", error);
+    toast.dismiss("deleting-row");
+    toast.error("Failed to delete row");
+  }
+};
 
   if (loading) {
     return (
       <div className="p-8 flex justify-center items-center">
-         <SpinnerBlur></SpinnerBlur>
+        <SpinnerBlur></SpinnerBlur>
       </div>
     );
   }
 
   if (error) {
-    return (
-      <div className="p-8 flex justify-center items-center">
-        <div className="flex flex-col gap-6 w-full">
-          
-          <h1 className="fontPoppins font-semibold text-black text-xl mb-10">
-            Shipping Configuration
-          </h1>
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            <strong>Error: </strong> {error}
-            <button
-              onClick={fetchData}
-              className="ml-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return <ShippingError error={error} onRetry={fetchData} />;
   }
 
+  const companies = [...new Set(allRatesData.map((item) => item.company))];
+
   return (
-    <div className="p-8 flex justify-center items-center fontPoppins">
- 
-      <div className="flex flex-col gap-6 w-full ">
-             
-        <div className="flex justify-between items-center">
-          <h1 className="fontPoppins font-semibold text-black text-2xl">
-            Shipping Configuration
-          </h1>
+    <div className="p-8 flex justify-center flex-col items-center fontPoppins">
+      <div className="flex flex-col gap-6 w-full">
+        <ShippingHeader
+          title="Shipping Configuration"
+          selectedCompany={selectedCompany}
+          companies={companies}
+          onCompanyChange={handleCompanyChange}
+          onAddCompany={() => setIsCompanyModalOpen(true)}
+          onAddZone={() => setIsZoneModalOpen(true)}
+          onSaveChanges={saveAllChanges}
+          hasChanges={hasChanges}
+          isSaving={isSaving}
+        />
 
-          <div className="flex gap-4 cursor-pointer">
-            <select
-              value={selectedCompany}
-              onChange={(e) => handleCompanyChange(e.target.value)}
-              className="bg-gray-50 cursor-pointer border w-56 border-gray-300 text-black text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-            >
-              {companies.map((company) => (
-                <option  key={company} value={company}>
-                  <span className="cursor-pointer">{company}</span>
-                </option>
-              ))}
-            </select>
-
-            <button
-              onClick={() => setIsZoneModalOpen(true)}
-              className="bg-blue-500  cursor-pointer text-white py-2.5 px-5 font-medium rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Add New Pricing
-            </button>
-
-            <button
-              onClick={saveAllChanges}
-              disabled={!hasChanges || isSaving}
-              className={`bg-green-500 cursor-pointer text-white py-2.5 px-5 font-medium rounded-lg hover:bg-green-600 transition-colors ${
-                !hasChanges || isSaving ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-            >
-              {isSaving ? "Saving..." : "Save All Changes"}
-            </button>
-          </div>
-        </div>
-
-        {filteredRates.map((companyData) => (
-          <div key={companyData._id} className="mb-8 p-5 rounded-xl bg-white">
-            <h2 className="text-xl font-semibold mb-4">
-              {companyData.company} Rates
-            </h2>
-            <div className="bg-white shadow-lg rounded-lg  border border-black overflow-hidden">
-  <div className="overflow-x-auto">
-    <table className="min-w-full divide-y divide-gray-200 border border-black">
-      <thead className="bg-blue-200">
-        <tr>
-          <th className="px-6 py-4 text-left text-sm font-bold text-black uppercase tracking-wider border border-black">
-            Weight (kg)
-          </th>
-          <th className="px-6 py-4 text-left text-sm font-bold text-black uppercase tracking-wider border border-black">
-            Parcel Type
-          </th>
-          {zoneKeys.map((zone) => (
-            <th
-              key={zone}
-              className="px-6 py-4 text-center text-sm font-bold text-black uppercase tracking-wider border border-black"
-            >
-              {zone.replace("Zone", "Zone ")}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody className="bg-white divide-y divide-gray-200">
-        {companyData.rates.map((item, rateIndex) => (
-          <tr key={item._id || rateIndex} className="hover:bg-gray-50">
-            <td className="px-6 py-4 text-center text-md font-semibold text-black border border-black bg-blue-200">
-              {item.weightKg}
-            </td>
-            <td className="px-6  py-4 border border-black">
-              <select
-                value={item.parcelType}
-                onChange={(e) =>
-                  handleParcelTypeChange(
-                    allRatesData.findIndex((c) => c._id === companyData._id),
-                    rateIndex,
-                    e.target.value
-                  )
-                }
-                className="bg-gray-50 border border-gray-300 text-black text-md rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-              >
-                <option value="DOX">DOX</option>
-                <option value="WPX">WPX</option>
-              </select>
-            </td>
-            {zoneKeys.map((zone) => (
-              <td key={zone} className="px-6 py-4 border border-black">
-                <input
-                  type="text"
-                  value={item.rates[zone] || ""}
-                  onChange={(e) =>
-                    handleRateChange(
-                      allRatesData.findIndex((c) => c._id === companyData._id),
-                      rateIndex,
-                      zone,
-                      e.target.value
-                    )
-                  }
-                  className="border border-gray-300 text-black font-medium rounded px-3 py-2 w-full max-w-24 text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0.00"
-                />
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-          </div>
-        ))}
-
-        {filteredRates.length === 0 && (
+        {filteredRates.length > 0 ? (
+          filteredRates.map((companyData) => (
+            <ShippingTable
+              key={companyData._id}
+              companyData={companyData}
+              zoneKeys={zoneKeys}
+              allRatesData={allRatesData}
+              onRateChange={handleRateChange}
+              onParcelTypeChange={handleParcelTypeChange}
+              onDuplicateRow={handleDuplicateRow}
+              onDeleteRow={handleDeleteRow}
+              handleWeightChange={handleWeightChange}
+            />
+          ))
+        ) : (
           <div className="text-center py-10">
             <p className="text-gray-500">
               No shipping rates found. Add new pricing to get started.
@@ -325,7 +319,7 @@ const Page = () => {
       <ModalCreateZone
         isOpen={isZoneModalOpen}
         onClose={() => setIsZoneModalOpen(false)}
-        title="Add New Shipping Pricing"
+        title="Add New Zone"
         onSubmit={handleAddNewPricing}
         companies={allRatesData.map((company) => ({
           id: company._id,
@@ -334,8 +328,14 @@ const Page = () => {
         zoneKeys={zoneKeys}
         fetchData={fetchData}
       />
+      <ModalCreateCompany
+        isOpen={isCompanyModalOpen}
+        fetchData={fetchData}
+        onClose={() => setIsCompanyModalOpen(false)}
+        title="Add New Company"
+      />
     </div>
   );
 };
 
-export default Page;
+export default ShippingConfigurationPage;

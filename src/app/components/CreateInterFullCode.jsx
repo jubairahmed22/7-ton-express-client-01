@@ -223,7 +223,6 @@ const CreateShipment = () => {
           );
           return {
             company: company.company,
-            singleImage: company.singleImage,
             rate: pricingEntry?.rates[`Zone${zone.name}`] || null,
           };
         });
@@ -253,7 +252,6 @@ const CreateShipment = () => {
       "selectedShippingRate",
       JSON.stringify({
         company: rate.company,
-        singleImage: rate.singleImage,
         price: rate.rate,
         weight: packageWeight,
         parcelType: receiverParcelType,
@@ -352,9 +350,7 @@ const CreateShipment = () => {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch(
-          "https://server-gs-two.vercel.app/api/countryList"
-        );
+        const response = await fetch("https://server-gs-two.vercel.app/api/countryList");
         const data = await response.json();
         if (data.success) {
           setCountries(data.data);
@@ -407,62 +403,51 @@ const CreateShipment = () => {
   };
 
   const validateForm = () => {
-  const newErrors = {};
-  const requiredFields = [
-    'senderFullName',
-    'senderEmail',
-    'senderPhone',
-    'pickupAddress',
-    'senderDistrictState',
-    'receiverFullName',
-    'receiverEmail',
-    'receiverPhone',
-    'deliveryAddress',
-    'receiverCountry',
-    'receiverStateCity',
-    'receiverZipCode',
-    'startDate',
-    'endDate'
-  ];
+    const newErrors = {};
+    const requiredFields = [
+      "senderFullName",
+      "senderEmail",
+      "senderPhone",
+      "pickupAddress",
 
-  // Check required fields
-  requiredFields.forEach(field => {
-    if (!formData[field]) {
-      newErrors[field] = 'This field is required';
+      "senderDistrictState",
+      "receiverFullName",
+      "receiverEmail",
+      "receiverPhone",
+      "deliveryAddress",
+      "receiverZipCode",
+    ];
+
+    // Check missing fields
+    const missing = requiredFields.filter((field) => !formData[field]);
+    setMissingFields(missing);
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.senderEmail && !emailRegex.test(formData.senderEmail)) {
+      newErrors.senderEmail = "Invalid email format";
     }
-  });
+    if (formData.receiverEmail && !emailRegex.test(formData.receiverEmail)) {
+      newErrors.receiverEmail = "Invalid email format";
+    }
 
-  // Email validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (formData.senderEmail && !emailRegex.test(formData.senderEmail)) {
-    newErrors.senderEmail = 'Invalid email format';
-  }
-  if (formData.receiverEmail && !emailRegex.test(formData.receiverEmail)) {
-    newErrors.receiverEmail = 'Invalid email format';
-  }
+    // Phone validation
+    const phoneRegex = /^[0-9]{10,15}$/;
+    if (formData.senderPhone && !phoneRegex.test(formData.senderPhone)) {
+      newErrors.senderPhone = "Phone must be 10-15 digits";
+    }
+    if (formData.receiverPhone && !phoneRegex.test(formData.receiverPhone)) {
+      newErrors.receiverPhone = "Phone must be 10-15 digits";
+    }
 
-  // Phone validation
-  const phoneRegex = /^[0-9]{10,15}$/;
-  if (formData.senderPhone && !phoneRegex.test(formData.senderPhone)) {
-    newErrors.senderPhone = 'Phone must be 10-15 digits';
-  }
-  if (formData.receiverPhone && !phoneRegex.test(formData.receiverPhone)) {
-    newErrors.receiverPhone = 'Phone must be 10-15 digits';
-  }
+    // Zip code validation
+    if (formData.receiverZipCode && isNaN(formData.receiverZipCode)) {
+      newErrors.receiverZipCode = "Zip code must be a number";
+    }
 
-  // Zip code validation
-  if (formData.receiverZipCode && isNaN(formData.receiverZipCode)) {
-    newErrors.receiverZipCode = 'Zip code must be a number';
-  }
-
-  // Date validation
-  if (formData.endDate && formData.startDate && formData.endDate < formData.startDate) {
-    newErrors.endDate = 'End date must be after start date';
-  }
-
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
+    setErrors(newErrors);
+    return missing.length === 0 && Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1591,16 +1576,7 @@ const CreateShipment = () => {
                                           />
                                         ) : (
                                           <span className="font-medium text-gray-700">
-                                            {
-                                              rate.singleImage ?
-                                               <img
-                                            className="h-6 w-auto"
-                                            src={rate.singleImage}
-                                            alt="DHL"
-                                          />:
-                                             <span>{rate.company}</span>
-                                            }
-                                            
+                                            {rate.company}
                                           </span>
                                         )}
                                       </div>
@@ -1664,18 +1640,9 @@ const CreateShipment = () => {
                                       alt="DHL"
                                     />
                                   ) : (
-                                    <span className="font-medium text-gray-700">
-                                            {
-                                              selectedRate.singleImage ?
-                                               <img
-                                            className="h-6 w-auto"
-                                            src={selectedRate.singleImage}
-                                            alt="DHL"
-                                          />:
-                                             <span>{selectedRate.company}</span>
-                                            }
-                                            
-                                          </span>
+                                    <span className="text-sm font-medium text-gray-700">
+                                      {selectedRate.company}
+                                    </span>
                                   )}
                                 </div>
                                 {/* price list */}
@@ -1702,7 +1669,7 @@ const CreateShipment = () => {
                                         </span>
                                       </div>
                                       <div className="text-2xl font-bold text-blue-700">
-                                        ${selectedRate.rate?.toFixed(2)}
+                                        ${selectedRate.rate.toFixed(2)}
                                       </div>
                                       <div className="text-lg font-semibold  rounded-md inline-block">
                                         ৳ {(selectedRate.rate * 120).toFixed(0)}

@@ -95,27 +95,59 @@ const CalculationModal = ({
   const [receiverParcelType, setReceiverParcelType] = useState(
     formData.shipmentDetails.parcelType || "DOX"
   );
-  const [activeTab, setActiveTab] = useState("weight"); // 'weight' or 'dimensions'
-  const [selectedRate, setSelectedRate] = useState(null); // Store selected rate
+  const [activeTab, setActiveTab] = useState(
+    formData.shipmentDetails.weightDetails?.[0]?.type === "dimensions"
+      ? "dimensions"
+      : "weight"
+  );
 
+  const [selectedRate, setSelectedRate] = useState(() => {
+    if (formData.shipmentDetails.company && formData.shipmentDetails.price) {
+      return {
+        company: formData.shipmentDetails.company,
+        rate: formData.shipmentDetails.price,
+      };
+    }
+    return null;
+  });
   // Weight/Dimension inputs
-  const [weightInputs, setWeightInputs] = useState([
-    {
-      id: 1,
-      value: 0.5,
-      description: "Package 1",
-    },
-  ]);
+  const [weightInputs, setWeightInputs] = useState(
+    formData.shipmentDetails.weightDetails?.length > 0 &&
+      formData.shipmentDetails.weightDetails[0].type === "weight"
+      ? formData.shipmentDetails.weightDetails.map((pkg, index) => ({
+          id: index + 1,
+          value: pkg.value,
+          description: pkg.description || `Package ${index + 1}`,
+        }))
+      : [
+          {
+            id: 1,
+            value: 0.5,
+            description: "Package 1",
+          },
+        ]
+  );
 
-  const [dimensionInputs, setDimensionInputs] = useState([
-    {
-      id: 1,
-      length: 0,
-      width: 0,
-      height: 0,
-      description: "Package 1",
-    },
-  ]);
+  const [dimensionInputs, setDimensionInputs] = useState(
+    formData.shipmentDetails.weightDetails?.length > 0 &&
+      formData.shipmentDetails.weightDetails[0].type === "dimensions"
+      ? formData.shipmentDetails.weightDetails.map((pkg, index) => ({
+          id: index + 1,
+          length: pkg.length,
+          width: pkg.width,
+          height: pkg.height,
+          description: pkg.description || `Package ${index + 1}`,
+        }))
+      : [
+          {
+            id: 1,
+            length: 0,
+            width: 0,
+            height: 0,
+            description: "Package 1",
+          },
+        ]
+  );
 
   // Available options
   const [weightOptions, setWeightOptions] = useState([0.5]);
@@ -240,6 +272,7 @@ const CalculationModal = ({
           );
           return {
             company: company.company,
+            singleImage: company.singleImage,
             rate: pricingEntry?.rates[`Zone${zone.name}`] || null,
           };
         });
@@ -299,6 +332,7 @@ const CalculationModal = ({
       "selectedShippingRate",
       JSON.stringify({
         company: rate.company,
+        singleImage: rate.singleImage,
         price: rate.rate,
         weight: packageWeight,
         parcelType: receiverParcelType,
@@ -401,7 +435,6 @@ const CalculationModal = ({
   return (
     <div>
       <div className="px-6 py-10 border-t border-gray-400">
-        
         <div className="space-y-4">
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -480,153 +513,163 @@ const CalculationModal = ({
             </div>
           </div>
           <div className="relative mt-4 col-span-2 px-6 py-4 bg-white rounded-lg shadow-sm border border-gray-100">
-  <div className="flex items-center justify-between">
-    <label
-      htmlFor="goodsType"
-      className="block text-sm font-semibold text-gray-800"
-    >
-      Goods Type
-      <span className="sr-only">selection</span>
-    </label>
-    <button
-      type="button"
-      onClick={() => setIsOpen(!isOpen)}
-      className="text-sm text-blue-600 hover:text-blue-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1 transition-all"
-      aria-expanded={isOpen}
-      aria-controls="goods-selector-dropdown"
-    >
-      {isOpen ? (
-        <>
-          <span className="sr-only">Close</span>
-          <span aria-hidden="true">Close</span>
-        </>
-      ) : (
-        <>
-          <span className="sr-only">Edit goods selection</span>
-          <span aria-hidden="true">Edit Goods</span>
-        </>
-      )}
-    </button>
-  </div>
-
-  {/* Display selected goods */}
-  <div className="mt-3">
-    {selectedGoods.length > 0 ? (
-      <div 
-        className="flex flex-wrap gap-2 min-h-10"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {selectedGoods.map((goods) => (
-          <span
-            key={goods}
-            className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
-          >
-            {goods}
-            <button
-              type="button"
-              onClick={() => handleGoodsSelection(goods)}
-              className="ml-1.5 -mr-0.5 text-blue-600 hover:text-blue-900 focus:outline-none"
-              aria-label={`Remove ${goods}`}
-            >
-              ×
-            </button>
-          </span>
-        ))}
-      </div>
-    ) : (
-      <p className="mt-2 text-sm text-gray-500 italic">No goods selected</p>
-    )}
-  </div>
-
-  {/* Dropdown for selecting goods */}
-  {isOpen && (
-    <div 
-      id="goods-selector-dropdown"
-      className="absolute z-10 mt-3 w-full md:w-96 bg-white shadow-lg rounded-lg border border-gray-200 focus:outline-none"
-      role="listbox"
-    >
-      <div className="p-2 max-h-60 overflow-y-auto">
-        {goodsTypes.map((goods) => (
-          <div
-            key={goods}
-            role="option"
-            aria-selected={selectedGoods.includes(goods)}
-            className={`flex items-center p-2 mt-1 hover:bg-blue-50 rounded-lg transition-colors duration-100 cursor-pointer ${
-              selectedGoods.includes(goods) ? 'bg-blue-50' : ''
-            }`}
-            onClick={() => handleGoodsSelection(goods)}
-          >
-            <input
-              id={`goods-${goods}`}
-              type="checkbox"
-              checked={selectedGoods.includes(goods)}
-              onChange={() => handleGoodsSelection(goods)}
-              className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
-              aria-labelledby={`goods-label-${goods}`}
-            />
-            <label
-              id={`goods-label-${goods}`}
-              htmlFor={`goods-${goods}`}
-              className="ml-3 text-sm font-medium text-gray-700 cursor-pointer flex-1"
-            >
-              {goods}
-            </label>
-            {selectedGoods.includes(goods) && (
-              <svg
-                className="w-4 h-4 text-blue-600"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
+            <div className="flex items-center justify-between">
+              <label
+                htmlFor="goodsType"
+                className="block text-sm font-semibold text-gray-800"
               >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
+                Goods Type
+                <span className="sr-only">selection</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1 transition-all"
+                aria-expanded={isOpen}
+                aria-controls="goods-selector-dropdown"
+              >
+                {isOpen ? (
+                  <>
+                    <span className="sr-only">Close</span>
+                    <span aria-hidden="true">Close</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="sr-only">Edit goods selection</span>
+                    <span aria-hidden="true">Edit Goods</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Display selected goods */}
+            <div className="mt-3">
+              {selectedGoods.length > 0 ? (
+                <div
+                  className="flex flex-wrap gap-2 min-h-10"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  {selectedGoods.map((goods) => (
+                    <span
+                      key={goods}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                    >
+                      {goods}
+                      <button
+                        type="button"
+                        onClick={() => handleGoodsSelection(goods)}
+                        className="ml-1.5 -mr-0.5 text-blue-600 hover:text-blue-900 focus:outline-none"
+                        aria-label={`Remove ${goods}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-2 text-sm text-gray-500 italic">
+                  No goods selected
+                </p>
+              )}
+            </div>
+
+            {/* Dropdown for selecting goods */}
+            {isOpen && (
+              <div
+                id="goods-selector-dropdown"
+                className="absolute z-10 mt-3 w-full md:w-96 bg-white shadow-lg rounded-lg border border-gray-200 focus:outline-none"
+                role="listbox"
+              >
+                <div className="p-2 max-h-60 overflow-y-auto">
+                  {goodsTypes.map((goods) => (
+                    <div
+                      key={goods}
+                      role="option"
+                      aria-selected={selectedGoods.includes(goods)}
+                      className={`flex items-center p-2 mt-1 hover:bg-blue-50 rounded-lg transition-colors duration-100 cursor-pointer ${
+                        selectedGoods.includes(goods) ? "bg-blue-50" : ""
+                      }`}
+                      onClick={() => handleGoodsSelection(goods)}
+                    >
+                      <input
+                        id={`goods-${goods}`}
+                        type="checkbox"
+                        checked={selectedGoods.includes(goods)}
+                        onChange={() => handleGoodsSelection(goods)}
+                        className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                        aria-labelledby={`goods-label-${goods}`}
+                      />
+                      <label
+                        id={`goods-label-${goods}`}
+                        htmlFor={`goods-${goods}`}
+                        className="ml-3 text-sm font-medium text-gray-700 cursor-pointer flex-1"
+                      >
+                        {goods}
+                      </label>
+                      {selectedGoods.includes(goods) && (
+                        <svg
+                          className="w-4 h-4 text-blue-600"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {selectedGoods.length > 0 && (
+                  <div className="border-t border-gray-200 px-3 py-2 bg-gray-50 rounded-b-lg flex justify-between items-center">
+                    <span className="text-xs text-gray-500">
+                      {selectedGoods.length} selected
+                    </span>
+                    <button
+                      type="button"
+                      onClick={clearAllGoods}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium focus:outline-none focus:underline"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
-        ))}
-      </div>
-      {selectedGoods.length > 0 && (
-        <div className="border-t border-gray-200 px-3 py-2 bg-gray-50 rounded-b-lg flex justify-between items-center">
-          <span className="text-xs text-gray-500">
-            {selectedGoods.length} selected
-          </span>
-          <button
-            type="button"
-            onClick={clearAllGoods}
-            className="text-xs text-blue-600 hover:text-blue-800 font-medium focus:outline-none focus:underline"
-          >
-            Clear all
-          </button>
-        </div>
-      )}
-    </div>
-  )}
-</div>
           {/* Weight/Dimensions Tabs */}
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <div className="flex border-b border-gray-200 mb-4">
               <button
+                type="button" // Add this to prevent form submission
                 className={`py-2 px-4 cursor-pointer font-medium ${
                   activeTab === "weight"
                     ? "text-blue-600 border-b-2 border-blue-600"
                     : "text-gray-500"
                 }`}
-                onClick={() => setActiveTab("weight")}
+                onClick={() => {
+                  setActiveTab("weight");
+                  // Don't update formData here
+                }}
               >
                 Weight (kg)
               </button>
               <button
+                type="button" // Add this to prevent form submission
                 className={`py-2 px-4 cursor-pointer font-medium ${
                   activeTab === "dimensions"
                     ? "text-blue-600 border-b-2 border-blue-600"
                     : "text-gray-500"
                 }`}
-                onClick={() => setActiveTab("dimensions")}
+                onClick={() => {
+                  setActiveTab("dimensions");
+                  // Don't update formData here
+                }}
               >
                 Dimensions (cm) - L x W x H
               </button>
@@ -1070,7 +1113,15 @@ const CalculationModal = ({
                                       />
                                     ) : (
                                       <span className="font-medium text-gray-700">
-                                        {rate.company}
+                                        {rate.singleImage ? (
+                                          <img
+                                            className="h-6 w-auto"
+                                            src={rate.singleImage}
+                                            alt="DHL"
+                                          />
+                                        ) : (
+                                          <span>{rate.company}</span>
+                                        )}
                                       </span>
                                     )}
                                   </div>
@@ -1078,7 +1129,7 @@ const CalculationModal = ({
 
                                 <div className="text-right">
                                   <span className="block text-lg font-bold text-gray-900">
-                                    ${rate.rate ? rate.rate.toFixed(2) : "N/A"}
+                                    ${rate.rate ? rate.rate?.toFixed(2) : "N/A"}
                                   </span>
                                   {rate.deliveryDays && (
                                     <span className="block text-sm text-gray-500">
@@ -1129,8 +1180,16 @@ const CalculationModal = ({
                                   alt="DHL"
                                 />
                               ) : (
-                                <span className="text-sm font-medium text-gray-700">
-                                  {selectedRate.company}
+                                <span className="font-medium text-gray-700">
+                                  {selectedRate.singleImage ? (
+                                    <img
+                                      className="h-6 w-auto"
+                                      src={selectedRate.singleImage}
+                                      alt="DHL"
+                                    />
+                                  ) : (
+                                    <span>{selectedRate.company}</span>
+                                  )}
                                 </span>
                               )}
                             </div>
@@ -1158,10 +1217,10 @@ const CalculationModal = ({
                                     </span>
                                   </div>
                                   <div className="text-2xl font-bold text-blue-700">
-                                    ${selectedRate.rate.toFixed(2)}
+                                    ${selectedRate.rate?.toFixed(2)}
                                   </div>
                                   <div className="text-lg font-semibold  rounded-md inline-block">
-                                    ৳ {(selectedRate.rate * 120).toFixed(0)}
+                                    ৳ {(selectedRate.rate * 120)?.toFixed(0)}
                                   </div>
                                 </div>
                               </div>
